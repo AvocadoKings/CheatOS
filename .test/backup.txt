@@ -1,0 +1,111 @@
+SdFat SD;
+Adafruit_ImageReader reader(SD);
+
+void _initSD_();
+
+File32 fetchFile(const char* path);
+
+File32 fetchWFile(const char* path);
+
+//////////////////////////////////////////////////
+
+void _initSD_(){
+    if (!SD.begin(SDCSpin)){
+        Serial.println("Failed opening SD");
+        return;
+    }
+};
+
+File32 fetchFile(const char* path){
+    File32 file;
+    file.open(path, FILE_READ);
+    return file;
+};
+
+File32 fetchWFile(const char* path){
+    File32 file;
+    file.open(path, FILE_WRITE);
+    return file;
+};
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+Adafruit_ST7789 display(CSpin, DCpin, MOSIpin, SCLKpin, RSTpin);
+
+uint16_t rgb(int r, int g, int b);
+
+void _initDisplay_();
+
+void drawPixel(uint16_t x, uint16_t y, uint16_t c);
+
+void drawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t c);
+
+void drawRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t );
+
+void drawRRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t r, uint16_t c);
+
+void drawTri(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t c);
+
+void drawCircle(uint16_t x, uint16_t y, uint16_t r, uint16_t c);
+
+void drawBitmap(uint16_t x, uint16_t y, uint8_t *map, uint16_t w, uint16_t h, uint16_t c);
+
+void drawImage(const char* path, uint16_t x, uint16_t y);
+
+/////////////////////////////////////////////////////////////
+
+void _initDisplay_(){
+    display.init(screenWidth, screenHeight);
+};
+
+uint16_t rgb(int r, int g, int b){
+  return ((((r+1)/8)-1) << 11) | ((((g+1)/4)-1) << 5) | (((b+1)/8)-1);
+};
+
+void drawPixel(uint16_t x, uint16_t y, uint16_t c) {
+    display.drawPixel(x, y, c);
+};
+
+void drawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t c) {
+    display.drawLine(x0, y0, x1, y1, c);
+};
+
+void drawRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t c) {
+    display.drawRect(x, y, w, h, c);
+};
+
+void drawRRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t r, uint16_t c) {
+    display.drawRoundRect(x, y, w, h, r, c);
+};
+
+void drawTri(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t c) {
+    display.drawTriangle(x0, y0, x1, y1, x2, y2, c);
+};
+
+void drawCircle(uint16_t x, uint16_t y, uint16_t r, uint16_t c) {
+    display.drawCircle(x, y, r, c);
+};
+
+void drawBitmap(uint16_t x, uint16_t y, uint8_t *map, uint16_t w, uint16_t h, uint16_t c) {
+    display.drawBitmap(x, y, map, w, h, c);
+};
+
+void drawImage(const char* path, uint16_t x, uint16_t y){
+    reader.drawBMP(path, display, x, y, true);
+};
+
+/////////////////////////////////////////////////////
+
+string instructionSet[] = {
+    "KEY",
+    "VALUE",
+    "STRING",
+    "ASSIGN",
+    "STATEMENT",
+    "CONDITION",
+    "INSTRUCTION",
+    "CONSOLE"
+};

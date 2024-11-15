@@ -5,13 +5,14 @@
 #include <Adafruit_ImageReader.h>
 #include <SDManager.h>
 #include <Render.h>
+#include <dap.h>
+#include <string>
 
-SdFat32 SD = _initSd_();
-Adafruit_ST7789 display = _initDisplay_();
-Adafruit_ImageReader reader = _initReader_(SD);
 
 void setup(){
-    Serial.begin(9600);
+    Serial.begin(115200);
+    string testcoding = "\n              \nx = 10\n ";
+    createInstructionList(testcoding);
 }
 
 void loop(){
