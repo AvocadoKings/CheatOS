@@ -7,33 +7,37 @@
 #include <Adafruit_ImageReader.h>
 #include <SdFat.h>
 
-#define screenWidth 320
-#define screenHeight 240
+#define screenWidth 240
+#define screenHeight 320
 #define CSpin 14
 #define DCpin 27
 #define MOSIpin 23
 #define SCLKpin 18
 #define RSTpin 33
 
-Adafruit_ST7789 _initDisplay_();
+Adafruit_ST7789 _initDisplay_(); // these are functions, not definitions dumbass -myself
 Adafruit_ImageReader _initReader_(SdFat32 SD);
 
 uint16_t rgb(int r, int g, int b);
 
-void drawPixel(Adafruit_ST7789 display, uint16_t x, uint16_t y, uint16_t c);
+void drawPixel(uint16_t x, uint16_t y, uint16_t c);
 
-void drawLine(Adafruit_ST7789 display, uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t c);
+void drawLine(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t c);
 
-void drawRect(Adafruit_ST7789 display, uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t );
+void drawRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t c, bool f=false);
 
-void drawRRect(Adafruit_ST7789 display, uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t r, uint16_t c);
+void drawRRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t r, uint16_t c);
 
-void drawTri(Adafruit_ST7789 display, uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t c);
+void drawTri(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t c);
 
-void drawCircle(Adafruit_ST7789 display, uint16_t x, uint16_t y, uint16_t r, uint16_t c);
+void drawCircle(uint16_t x, uint16_t y, uint16_t r, uint16_t c);
 
-void drawBitmap(Adafruit_ST7789 display, uint16_t x, uint16_t y, uint8_t *map, uint16_t w, uint16_t h, uint16_t c);
+void drawBitmap(uint16_t x, uint16_t y, uint8_t *map, uint16_t w, uint16_t h, uint16_t c);
 
-void drawImage(Adafruit_ST7789 display, Adafruit_ImageReader reader, const char* path, uint16_t x, uint16_t y);
+void clearScreen();
+
+void fillScreen(uint16_t c);
+
+void drawImage(const char* path, uint16_t x, uint16_t y);
 
 #endif
