@@ -1,119 +1,59 @@
 #include <Arduino.h>
-#include <Adafruit_GFX.h>
-#include <Adafruit_ST7789.h>
-#include <SdFat.h>
-#include <Adafruit_ImageReader.h>
-#include <SDManager.h>
-#include <Render.h>
 #include <string>
-#include <vector>
-#include <firm.h>
+#include <TFT.h>
+#include <rotary.h>
+#include <utils.h>
 
-#define rot1_1 4
-#define rot2_1 15
-#define rotSw_1 16
-#define rot1_2 35
-#define rot2_2 34
-#define rotSw_2 25
+#define TFT_MISO 19
+#define TFT_MOSI 23
+#define TFT_SCLK 18
+#define TFT_CS   15  // Chip select control pin
+#define TFT_DC   2  // Data Command control pin
+#define TFT_RST  4 
 
-int rot11 = 0;
-int rot12 = 0;
-int rot15 = 0;
+Encoder rotary1 = Encoder(33, 32, 26, 10);
+Encoder rotary2 = Encoder(35, 34, 225, 10);
 
-int rot21 = 0;
-int rot22 = 0;
-int rot25 = 0;
+TaskHandle_t rotaryTask;
 
-int rotationX = 160;
-int rotationY = 120;
+uint16_t *screen = (uint16_t*)malloc(160*120*2);
 
-int prevX = 160;
-int prevY = 120;
-
-int r=255;
-int b=255;
-int g=255;
-uint16_t color = rgb(r,g,b);
-
-Adafruit_ST7789 display = _initDisplay_();
+void updateRot(void * parameter){
+    while(true){
+        rotary1.tick();
+        rotary2.tick();
+        delay(1);
+    }
+}
 
 void setup(){
     Serial.begin(9600);
+    TFTInit();
+    _initAll_();
+    Serial.println(xPortGetCoreID());
+    xTaskCreatePinnedToCore(updateRot, "Rotary", 10000, NULL, 0, &rotaryTask, 0);
 
-    clearScreen();
-    display.setTextSize(2);
-    display.setTextColor(ST77XX_WHITE);
+    String logo = SD.open("/dvd.cif").readString();
     
-    pinMode(rot1_1, INPUT);
-    pinMode(rot2_1, INPUT);
-    pinMode(rotSw_1, INPUT);
-    pinMode(rot1_2, INPUT);
-    pinMode(rot2_2, INPUT);
-    pinMode(rotSw_2, INPUT);
+    bool xdir = false;
+    bool ydir = false;
+
+    int xPos = 1;
+    int yPos = 1;
+
+    while(xPos!=0 || yPos!=0){
+        memset(screen, 0, 160*120*2);
+        if(xPos==160-32||xPos==0){xdir=!xdir;}
+        if(yPos==120-14||yPos==0){ydir=!ydir;}
+        xPos +=(xdir)?-1:1;
+        yPos +=(ydir)?-1:1;
+        drawImage(logo, xPos, yPos, 32,14,screen);
+        drawPixel(rotary1.prev, rotary2.prev, 0xFFFF, screen);
+        drawPixels(screen);
+    }
+
 }
 
 void loop(){
 
-    bool in1 = !digitalRead(rot1_1); 
-    bool in2 = !digitalRead(rot2_1); 
-    bool in3 = !digitalRead(rot1_2); 
-    bool in4 = !digitalRead(rot2_2); 
-
-    if (in1){
-        rot11 = 1;
-        if (in1 && in2) {rot15 = 1;}
-        if (rot11 && !in2 && rot15) {rotationX-=1; rot11 = 0;rot12 = 0;rot15 = 0;}
-    }
-    if (in2){
-        rot12 = 1;   
-        if (in1 && in2) {rot15 = 1;}
-        if (rot12 && !in1 && rot15) {rotationX+=1; rot11 = 0;rot12 = 0;rot15 = 0;}
-    }
-    if (in3){
-        rot21 = 1;
-        if (in3 && in4) {rot25 = 1;}
-        if (rot21 && !in4 && rot25) {rotationY+=1; rot21 = 0;rot22 = 0;rot25 = 0;}
-    }
-    if (in4){
-        rot22 = 1;   
-        if (in3 && in4) {rot25 = 1;}
-        if (rot22 && !in3 && rot25) {rotationY-=1; rot21 = 0;rot22 = 0;rot25 = 0;}
-    }
-
-    if(!digitalRead(rotSw_1) && !digitalRead(rotSw_2)){
-        clearScreen();
-    }
-
-    int deltaX = (rotationX - prevX)*5;
-    int deltaY = -(rotationY - prevY)*5;
-    if (!digitalRead(rotSw_1) && deltaX!=0) {
-
-        if (r+deltaX<=255 && r+deltaX>=0){
-            r += deltaX;
-            Serial.println(r);
-            color = rgb(r, g, b);
-        }
-
-    } else if (!digitalRead(rotSw_1) && deltaY!=0) {
-
-        if (g+deltaY<=255 && g+deltaY>=0){
-            g += deltaY;
-            Serial.println(g);
-            color = rgb(r, g, b);
-        }
-        
-    } else if (!digitalRead(rotSw_2) && deltaX!=0) {
-
-        if (b+deltaX<=255 && b+deltaX>=0){
-            b += deltaX;
-            Serial.println(b);
-            color = rgb(r, g, b);
-        }
-
-    }else if (digitalRead(rotSw_1) && digitalRead(rotSw_2)){
-        drawLine(prevX, prevY, rotationX, rotationY, color);
-    }
-    prevX = rotationX;
-    prevY = rotationY;
-    drawLine(0, 239, 319, 239, color);
 }
